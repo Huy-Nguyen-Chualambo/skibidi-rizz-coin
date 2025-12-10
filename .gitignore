@@ -1,0 +1,80 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Environment variables (IMPORTANT: Never commit these!)
+.env
+.env.local
+.env.production
+.env.development
+frontend/.env.local
+frontend/.env
+
+# Deployment info (contains contract addresses and sensitive data)
+deployment-info.json
+merkle-tree.json
+
+# Hardhat
+cache/
+artifacts/
+typechain/
+typechain-types/
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/dist/
+
+# Testing
+coverage/
+coverage.json
+*.lcov
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+
+# OS
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Private keys (CRITICAL!)
+*.key
+*.pem
+private-keys/
+secrets/
+
+# Build files
+dist/
+build/
+
+# Lock files (optional - some prefer to commit these)
+# package-lock.json
+# yarn.lock
+
+# Gas reports
+gas-report.txt
+
+# Documentation builds
+docs/_build/
+
+# Local blockchain data
+hardhat/

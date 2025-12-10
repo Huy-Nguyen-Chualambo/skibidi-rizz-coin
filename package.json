@@ -1,0 +1,34 @@
+{
+  "name": "skibidi-rizz-token",
+  "version": "1.0.0",
+  "description": "SkibidiRizzToken (SRT) - DeFi Airdrop Platform",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
+    "deploy:localhost": "hardhat run scripts/deploy.js --network localhost",
+    "node": "hardhat node",
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build"
+  },
+  "keywords": [
+    "defi",
+    "airdrop",
+    "erc20",
+    "blockchain",
+    "web3"
+  ],
+  "author": "SkibidiRizz Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "dotenv": "^16.3.1",
+    "hardhat": "^2.19.4",
+    "keccak256": "^1.0.6",
+    "merkletreejs": "^0.6.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.1"
+  }
+}
