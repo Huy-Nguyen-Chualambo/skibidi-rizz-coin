@@ -21,14 +21,8 @@ export default function ClaimAirdrop({ onSuccess }: { onSuccess?: () => void }) 
         setMessage("");
 
         try {
-            const { getMerkleProof, isWhitelisted } = await import("@/utils/merkle");
-
-            if (!isWhitelisted(account)) {
-                setStatus("error");
-                setMessage("❌ BLUD IS NOT ON THE LIST! (Skill Issue)");
-                setClaiming(false);
-                return;
-            }
+            // Public Airdrop - No whitelist check needed!
+            // const { getMerkleProof, isWhitelisted } = await import("@/utils/merkle");
 
             // Proof generation removed as per instruction.
             // The airdrop is now public, so no merkle proof is needed for the claim function.
