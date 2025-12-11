@@ -3,22 +3,14 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
- * @title SkibidiAirdrop
- * @dev Airdrop distribution contract with Merkle Tree verification
- * 
- * Features:
- * - Merkle tree whitelist for gas-efficient verification
- * - One claim per address anti-spam mechanism
- * - Admin functions to manage distribution
- * - Emergency withdrawal functionality
+ * @title SkibidiAirdrop (Public Version)
+ * @dev Public Airdrop distribution - First Come First Served
  */
 contract SkibidiAirdrop is Ownable, ReentrancyGuard {
     IERC20 public immutable token;
-    bytes32 public merkleRoot;
     uint256 public airdropAmount;
     
     // Track claims
@@ -33,7 +25,6 @@ contract SkibidiAirdrop is Ownable, ReentrancyGuard {
     uint256 public airdropStartTime;
     uint256 public airdropEndTime;
     
-    event MerkleRootUpdated(bytes32 indexed newMerkleRoot);
     event AirdropClaimed(address indexed user, uint256 amount);
     event AirdropAmountUpdated(uint256 newAmount);
     event AirdropStatusUpdated(bool status);
@@ -42,7 +33,6 @@ contract SkibidiAirdrop is Ownable, ReentrancyGuard {
     
     constructor(
         address _token,
-        bytes32 _merkleRoot,
         uint256 _airdropAmount,
         address initialOwner
     ) Ownable(initialOwner) {
@@ -50,24 +40,19 @@ contract SkibidiAirdrop is Ownable, ReentrancyGuard {
         require(_airdropAmount > 0, "Airdrop amount must be greater than 0");
         
         token = IERC20(_token);
-        merkleRoot = _merkleRoot;
         airdropAmount = _airdropAmount;
         airdropActive = false;
     }
     
     /**
-     * @dev Claim airdrop tokens using Merkle proof
-     * @param merkleProof Merkle proof for verification
+     * @dev Claim airdrop tokens (No Merkle Proof needed)
      */
-    function claimAirdrop(bytes32[] calldata merkleProof) external nonReentrant {
+    function claimAirdrop() external nonReentrant {
         require(airdropActive, "Airdrop is not active");
         require(block.timestamp >= airdropStartTime, "Airdrop has not started yet");
         require(block.timestamp <= airdropEndTime, "Airdrop has ended");
         require(!hasClaimed[msg.sender], "Already claimed");
-        
-        // Verify merkle proof
-        bytes32 leaf = keccak256(abi.encodePacked(msg.sender));
-        require(MerkleProof.verify(merkleProof, merkleRoot, leaf), "Invalid merkle proof");
+        require(token.balanceOf(address(this)) >= airdropAmount, "Airdrop empty");
         
         // Mark as claimed
         hasClaimed[msg.sender] = true;
@@ -80,53 +65,23 @@ contract SkibidiAirdrop is Ownable, ReentrancyGuard {
         emit AirdropClaimed(msg.sender, airdropAmount);
     }
     
-    /**
-     * @dev Check if an address is eligible for airdrop
-     * @param user Address to check
-     * @param merkleProof Merkle proof for verification
-     */
-    function isEligible(address user, bytes32[] calldata merkleProof) external view returns (bool) {
-        if (hasClaimed[user]) {
-            return false;
-        }
-        
-        bytes32 leaf = keccak256(abi.encodePacked(user));
-        return MerkleProof.verify(merkleProof, merkleRoot, leaf);
+    // Helper to check eligibility
+    function isEligible(address user) external view returns (bool) {
+        return !hasClaimed[user] && token.balanceOf(address(this)) >= airdropAmount;
     }
     
-    /**
-     * @dev Update merkle root (admin only)
-     * @param _merkleRoot New merkle root
-     */
-    function setMerkleRoot(bytes32 _merkleRoot) external onlyOwner {
-        merkleRoot = _merkleRoot;
-        emit MerkleRootUpdated(_merkleRoot);
-    }
-    
-    /**
-     * @dev Update airdrop amount per claim (admin only)
-     * @param _airdropAmount New airdrop amount
-     */
+    // Admin functions
     function setAirdropAmount(uint256 _airdropAmount) external onlyOwner {
         require(_airdropAmount > 0, "Amount must be greater than 0");
         airdropAmount = _airdropAmount;
         emit AirdropAmountUpdated(_airdropAmount);
     }
     
-    /**
-     * @dev Set airdrop active status (admin only)
-     * @param _status New status
-     */
     function setAirdropStatus(bool _status) external onlyOwner {
         airdropActive = _status;
         emit AirdropStatusUpdated(_status);
     }
     
-    /**
-     * @dev Set airdrop start and end time (admin only)
-     * @param _startTime Start timestamp
-     * @param _endTime End timestamp
-     */
     function setAirdropTime(uint256 _startTime, uint256 _endTime) external onlyOwner {
         require(_endTime > _startTime, "End time must be after start time");
         airdropStartTime = _startTime;
@@ -134,9 +89,6 @@ contract SkibidiAirdrop is Ownable, ReentrancyGuard {
         emit AirdropTimeUpdated(_startTime, _endTime);
     }
     
-    /**
-     * @dev Emergency withdraw remaining tokens (admin only)
-     */
     function emergencyWithdraw() external onlyOwner {
         uint256 balance = token.balanceOf(address(this));
         require(balance > 0, "No tokens to withdraw");
@@ -144,16 +96,10 @@ contract SkibidiAirdrop is Ownable, ReentrancyGuard {
         emit EmergencyWithdraw(owner(), balance);
     }
     
-    /**
-     * @dev Get remaining tokens in contract
-     */
     function getRemainingTokens() external view returns (uint256) {
         return token.balanceOf(address(this));
     }
     
-    /**
-     * @dev Get airdrop statistics
-     */
     function getStats() external view returns (
         uint256 _totalClaimed,
         uint256 _totalParticipants,
