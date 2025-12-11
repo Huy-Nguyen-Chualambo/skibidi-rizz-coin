@@ -252,6 +252,7 @@ export default function Home() {
           <div className="backdrop-blur-lg bg-black/40 p-6 rounded-2xl border border-white/10 max-w-2xl mx-auto">
             <p className="text-xs text-gray-500 font-mono leading-relaxed">
               NOT FINANCIAL ADVICE. IF YOU LOSE MONEY IT'S A SKILL ISSUE.
+              COPY THIS AND ADD TO YOUR DAPP: 0x17164f16cb9C811637DEd6D9C64aA730A042E80e
               <br />
               <span className="text-purple-400">DYOR • NFA • WAGMI • LFG</span>
             </p>
