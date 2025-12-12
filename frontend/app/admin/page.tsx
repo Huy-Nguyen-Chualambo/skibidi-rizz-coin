@@ -111,9 +111,9 @@ export default function AdminDashboard() {
             </h1>
 
             {/* ERROR WARNING */}
-            {chainId !== 1337 && (
+            {chainId !== parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || "11155111") && (
                 <div className="bg-red-500/20 border border-red-500 text-red-200 p-4 rounded-xl mb-6">
-                    ⚠️ Wrong Network! Please switch to Hardhat Local (1337) to view debug data.
+                    ⚠️ Wrong Network! Please switch to {process.env.NEXT_PUBLIC_CHAIN_ID === "11155111" ? "Sepolia" : "Localhost"} to view debug data.
                 </div>
             )}
 
