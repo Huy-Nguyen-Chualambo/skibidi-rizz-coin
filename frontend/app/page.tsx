@@ -9,7 +9,6 @@ import ClaimAirdrop from '@/components/ClaimAirdrop';
 export default function Home() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [scrollY, setScrollY] = useState(0);
-  const [particles, setParticles] = useState<any[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
@@ -21,17 +20,6 @@ export default function Home() {
       setScrollY(window.scrollY);
     };
 
-    // Generate random particles
-    const newParticles = Array.from({ length: 15 }, (_, i) => ({
-      id: i,
-      emoji: ['🚽', '🗿', '💀', '🔥', '💅', '💎', '⚡', '🌟'][i % 8],
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      delay: Math.random() * 5,
-      duration: 10 + Math.random() * 10,
-    }));
-    setParticles(newParticles);
-
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('scroll', handleScroll);
     return () => {
@@ -41,233 +29,159 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-black text-white overflow-hidden relative">
+    <div className="min-h-screen bg-black text-white overflow-hidden relative selection:bg-cyan-500 selection:text-black">
 
-      {/* ANIMATED GRID BACKGROUND */}
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-20">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `
-            linear-gradient(rgba(147, 51, 234, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(147, 51, 234, 0.1) 1px, transparent 1px)
-          `,
-          backgroundSize: '50px 50px',
-          transform: `translateY(${scrollY * 0.5}px)`,
-        }} />
-      </div>
-
-      {/* FLOATING PARTICLES WITH PARALLAX */}
+      {/* BACKGROUND EFFECTS */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        {particles.map((particle) => (
-          <div
-            key={particle.id}
-            className="absolute text-4xl opacity-30 blur-sm"
-            style={{
-              left: `${particle.x}%`,
-              top: `${particle.y}%`,
-              animation: `float ${particle.duration}s ease-in-out infinite`,
-              animationDelay: `${particle.delay}s`,
-              transform: `translate(${(mousePos.x - window.innerWidth / 2) * 0.02}px, ${(mousePos.y - window.innerHeight / 2) * 0.02}px)`,
-              transition: 'transform 0.3s ease-out',
-            }}
-          >
-            {particle.emoji}
-          </div>
-        ))}
+        {/* Cyber Grid */}
+        <div className="absolute inset-0 opacity-20" style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(56, 189, 248, 0.3) 1px, transparent 0)`,
+          backgroundSize: '40px 40px',
+          transform: `translateY(${scrollY * 0.2}px)`
+        }} />
+
+        {/* Glow Spheres */}
+        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-blue-600/20 rounded-full blur-[120px] mix-blend-screen animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-cyan-600/20 rounded-full blur-[120px] mix-blend-screen animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      {/* GRADIENT ORBS */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }} />
-      </div>
-
-      {/* CONFETTI EFFECT */}
       {showConfetti && (
         <div className="fixed inset-0 pointer-events-none z-[100]">
-          {Array.from({ length: 50 }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute text-2xl"
+          {/* Simple confetti can be kept or replaced with cleaner effect */}
+          {Array.from({ length: 30 }).map((_, i) => (
+            <div key={i} className="absolute w-2 h-2 bg-cyan-400 rounded-full"
               style={{
                 left: `${Math.random() * 100}%`,
-                top: '-10%',
-                animation: `fall ${2 + Math.random() * 2}s linear forwards`,
-                animationDelay: `${Math.random() * 0.5}s`,
+                top: '-10px',
+                animation: `fall ${2 + Math.random()}s linear forwards`
               }}
-            >
-              {['🎉', '💰', '🚀', '⭐', '💎'][Math.floor(Math.random() * 5)]}
-            </div>
+            />
           ))}
         </div>
       )}
 
-      {/* NAVBAR WITH GLASSMORPHISM */}
-      <nav className="relative z-50 backdrop-blur-xl bg-black/30 border-b border-white/10 shadow-2xl">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3 group cursor-pointer">
-              <span className="text-5xl group-hover:scale-110 transition-transform duration-300 group-hover:rotate-12">🚽</span>
-              <h1 className="text-4xl font-black uppercase tracking-tighter bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 bg-clip-text text-transparent animate-gradient">
-                SKIBIDI RIZZ
-              </h1>
+      {/* NAVBAR */}
+      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/50 border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-2 group cursor-pointer">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center font-bold text-black shadow-lg shadow-blue-500/50">
+              S
             </div>
+            <span className="font-bold text-xl tracking-tight text-white group-hover:text-cyan-400 transition-colors">
+              Skibidi<span className="text-gray-500">Protocol</span>
+            </span>
+          </div>
 
-            <div className="flex items-center gap-4">
-              <Link href="/admin" className="hidden md:block px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-xl font-bold text-sm shadow-lg hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105 hover:-rotate-2 text-white">
-                🛠️ ADMIN HACK
-              </Link>
-              <ConnectButton />
-            </div>
+          <div className="flex items-center gap-6">
+            <Link href="/admin" className="hidden md:block text-sm text-gray-400 hover:text-white transition-colors">
+              Admin Panel
+            </Link>
+            <ConnectButton />
           </div>
         </div>
       </nav>
 
       {/* HERO SECTION */}
-      <main className="relative z-10 max-w-7xl mx-auto px-4 py-16">
+      <main className="relative z-10 pt-32 pb-20 px-6 max-w-7xl mx-auto">
 
-        {/* WARNING BADGE */}
-        <div className="flex justify-center mb-8">
-          <div className="relative group cursor-pointer">
-            <div className="absolute inset-0 bg-yellow-400 blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
-            <div className="relative bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-black text-xl md:text-2xl px-8 py-3 rounded-full uppercase tracking-wider transform group-hover:scale-110 transition-transform duration-300 shadow-2xl">
-              ⚠️ WARNING: GYATT LEVEL 9000 ⚠️
-            </div>
-          </div>
-        </div>
-
-        {/* MAIN TITLE */}
-        <div className="text-center mb-16">
-          <h1 className="text-7xl md:text-9xl font-black mb-6 leading-none">
-            <span className="inline-block bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent animate-pulse drop-shadow-2xl">
-              OHIO FINAL
+        <div className="text-center max-w-4xl mx-auto mb-24">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium mb-8">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
             </span>
-            <br />
-            <span className="inline-block bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 bg-clip-text text-transparent animate-gradient drop-shadow-2xl">
-              BOSS TOKEN
+            Live on Sepolia Testnet
+          </div>
+
+          <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-8 leading-tight">
+            The Future of <br />
+            <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-300 bg-clip-text text-transparent">
+              Decentralized Rizz.
             </span>
           </h1>
 
-          <div className="relative inline-block mt-8 group cursor-pointer">
-            <div className="absolute inset-0 bg-pink-500 blur-2xl opacity-30 group-hover:opacity-50 transition-opacity" />
-            <div className="relative backdrop-blur-lg bg-black/60 p-6 rounded-3xl border-2 border-pink-500/50 shadow-2xl max-w-3xl mx-auto">
-              <p className="text-2xl md:text-3xl font-bold text-pink-300 leading-relaxed">
-                No Cap 🧢 • No Fanum Tax 🍕 • 100% Sigma Grindset 🗿
-                <br />
-                <span className="text-yellow-300 inline-block mt-2 animate-bounce">
-                  Claim your FREE SRT before it's too late!
-                </span>
-              </p>
+          <p className="text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto mb-12">
+            Experience the next generation of meme-finance infrastructure.
+            Secure, scalable, and built for the community.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-cyan-500/50 transition-colors group">
+              <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">🛡️</div>
+              <h3 className="text-lg font-bold text-white mb-2">Audited Security</h3>
+              <p className="text-gray-400 text-sm">Smart contracts verified and tested on Sepolia network.</p>
+            </div>
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-cyan-500/50 transition-colors group">
+              <div className="w-12 h-12 rounded-lg bg-cyan-500/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">⚡</div>
+              <h3 className="text-lg font-bold text-white mb-2">Instant Settlement</h3>
+              <p className="text-gray-400 text-sm">Modified ERC-20 standard for lightning-fast transfers.</p>
+            </div>
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-cyan-500/50 transition-colors group">
+              <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">🌐</div>
+              <h3 className="text-lg font-bold text-white mb-2">Public Access</h3>
+              <p className="text-gray-400 text-sm">Open distribution model with fair-launch mechanics.</p>
             </div>
           </div>
         </div>
 
-        {/* STATS BOARD WITH 3D EFFECT */}
-        <AirdropStats />
+        {/* CLAIM INTERFACE */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
 
-        {/* CLAIM SECTION */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
+          <div className="lg:col-span-7 space-y-8">
+            <AirdropStats />
 
-          {/* CLAIM CARD */}
-          <ClaimAirdrop onSuccess={() => {
-            setShowConfetti(true);
-            setTimeout(() => setShowConfetti(false), 5000);
-          }} />
-
-          {/* INFO CARDS */}
-          <div className="space-y-8">
-
-            {/* TOKENOMICS */}
-            <div className="relative group">
-              <div className="absolute inset-0 bg-cyan-500 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
-              <div className="relative backdrop-blur-xl bg-blue-900/60 p-8 rounded-3xl border-2 border-cyan-400/50 shadow-2xl">
-                <h3 className="text-4xl font-black text-cyan-300 mb-6 flex items-center gap-3">
-                  <span className="text-5xl">📉</span> TOKENOMICS
-                </h3>
-                <div className="space-y-4">
-                  {[
-                    { label: 'Total Supply', value: '1,000,000 SRT', color: 'text-yellow-400' },
-                    { label: '4 Da Boyz', value: '40%', color: 'text-green-400' },
-                    { label: 'Skibidi Marketing', value: '20%', color: 'text-pink-400' },
-                    { label: 'Grimace Shake Fund', value: '40%', color: 'text-purple-400' },
-                  ].map((item, i) => (
-                    <div key={i} className="flex justify-between items-center p-4 backdrop-blur-lg bg-black/40 rounded-xl border border-white/10 hover:border-cyan-400/50 transition-colors group/item">
-                      <span className="font-bold text-lg group-hover/item:text-cyan-300 transition-colors">{item.label}</span>
-                      <span className={`font-black text-xl ${item.color}`}>{item.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* ROADMAP */}
-            <div className="relative group">
-              <div className="absolute inset-0 bg-orange-500 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
-              <div className="relative backdrop-blur-xl bg-red-900/60 p-8 rounded-3xl border-2 border-orange-500/50 shadow-2xl">
-                <h3 className="text-4xl font-black text-orange-300 mb-6 flex items-center gap-3">
-                  <span className="text-5xl">🛣️</span> ROADMAP
-                </h3>
-                <div className="space-y-5">
-                  {[
-                    { date: 'SEP 2024', text: 'Launch Token', status: 'done', color: 'bg-green-500' },
-                    { date: 'NOW', text: 'Mogging ETH', status: 'active', color: 'bg-yellow-400' },
-                    { date: 'SOON™', text: 'Buy Ohio', status: 'pending', color: 'bg-gray-500' },
-                  ].map((item, i) => (
-                    <div key={i} className="flex gap-4 items-center p-4 backdrop-blur-lg bg-black/40 rounded-xl border border-white/10 hover:border-orange-400/50 transition-all group/item">
-                      <div className={`${item.color} text-black font-black px-4 py-2 rounded-lg shadow-lg transform group-hover/item:scale-110 transition-transform`}>
-                        {item.date}
-                      </div>
-                      <p className={`font-bold text-lg flex-1 ${item.status === 'done' ? 'line-through text-gray-500' : item.status === 'active' ? 'animate-pulse text-white' : 'text-gray-400'}`}>
-                        {item.text}
-                      </p>
-                      {item.status === 'done' && <span className="text-2xl">✅</span>}
-                      {item.status === 'active' && <span className="text-2xl animate-spin">⚡</span>}
-                    </div>
-                  ))}
-                </div>
-              </div>
+            {/* Token Info Table */}
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-sm">
+              <table className="w-full text-left text-sm">
+                <tbody className="divide-y divide-white/5">
+                  <tr className="hover:bg-white/5 transition-colors">
+                    <td className="p-4 text-gray-400">Token Name</td>
+                    <td className="p-4 font-mono text-white text-right">Skibidi Rizz Token</td>
+                  </tr>
+                  <tr className="hover:bg-white/5 transition-colors">
+                    <td className="p-4 text-gray-400">Symbol</td>
+                    <td className="p-4 font-mono text-cyan-400 text-right">SRT</td>
+                  </tr>
+                  <tr className="hover:bg-white/5 transition-colors">
+                    <td className="p-4 text-gray-400">Network</td>
+                    <td className="p-4 font-mono text-white text-right">Sepolia</td>
+                  </tr>
+                  <tr className="hover:bg-white/5 transition-colors">
+                    <td className="p-4 text-gray-400">Contract</td>
+                    <td className="p-4 font-mono text-gray-500 text-right text-xs truncate max-w-[200px]">
+                      {process.env.NEXT_PUBLIC_TOKEN_ADDRESS}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
+
+          <div className="lg:col-span-5 sticky top-24">
+            <ClaimAirdrop onSuccess={() => {
+              setShowConfetti(true);
+              setTimeout(() => setShowConfetti(false), 5000);
+            }} />
+
+            <p className="mt-6 text-center text-xs text-gray-500">
+              By connecting your wallet, you agree to our Terms of Service.
+              <br />Gas fees are required for transaction processing.
+            </p>
+          </div>
+
         </div>
 
         {/* FOOTER */}
-        <footer className="mt-32 border-t-2 border-white/10 pt-16 pb-8 text-center">
-          <div className="mb-8">
-            <p className="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-6 uppercase tracking-wider">
-              BUILT DIFFERENT 😤
-            </p>
-            <div className="flex justify-center gap-6">
-              {['🐦', '👾', '✈️'].map((emoji, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  className="w-16 h-16 flex items-center justify-center text-4xl backdrop-blur-lg bg-white/5 rounded-2xl border border-white/10 hover:border-purple-400/50 hover:bg-purple-900/30 transition-all duration-300 hover:scale-125 hover:rotate-12"
-                >
-                  {emoji}
-                </a>
-              ))}
-            </div>
-          </div>
-
-          <div className="backdrop-blur-lg bg-black/40 p-6 rounded-2xl border border-white/10 max-w-2xl mx-auto">
-            <p className="text-xs text-gray-500 font-mono leading-relaxed">
-              NOT FINANCIAL ADVICE. IF YOU LOSE MONEY IT'S A SKILL ISSUE.
-              COPY THIS AND ADD TO YOUR DAPP: 0x17164f16cb9C811637DEd6D9C64aA730A042E80e
-              <br />
-              <span className="text-purple-400">DYOR • NFA • WAGMI • LFG</span>
-            </p>
+        <footer className="mt-32 border-t border-white/5 pt-12 pb-8 text-center text-gray-500 text-sm">
+          <p>© 2024 Skibidi Protocol Foundation. All rights reserved.</p>
+          <div className="flex justify-center gap-6 mt-4 opacity-50">
+            <a href="#" className="hover:text-white transition-colors">Twitter</a>
+            <a href="#" className="hover:text-white transition-colors">Discord</a>
+            <a href="#" className="hover:text-white transition-colors">GitHub</a>
           </div>
         </footer>
-      </main>
 
-      <style jsx>{`
-        .perspective-1000 {
-          perspective: 1000px;
-        }
-        .transform-style-3d {
-          transform-style: preserve-3d;
-        }
-      `}</style>
+      </main>
     </div>
   );
 }
