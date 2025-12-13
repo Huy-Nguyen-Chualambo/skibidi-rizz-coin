@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+// import Link from 'next/link';
 import ConnectButton from '@/components/ConnectButton';
 import AirdropStats from '@/components/AirdropStats';
 import ClaimAirdrop from '@/components/ClaimAirdrop';
@@ -73,9 +73,6 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-6">
-            <Link href="/admin" className="hidden md:block text-sm text-gray-400 hover:text-white transition-colors">
-              Admin Panel
-            </Link>
             <ConnectButton />
           </div>
         </div>
