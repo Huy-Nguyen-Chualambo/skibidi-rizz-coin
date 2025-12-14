@@ -4,113 +4,84 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 /**
- * @title SkibidiAirdrop (Public Version)
- * @dev Public Airdrop distribution - First Come First Served
+ * @title SkibidiAirdrop (Task-Based)
+ * @dev Distributes tokens based on backend verification (Signature)
  */
 contract SkibidiAirdrop is Ownable, ReentrancyGuard {
+    using ECDSA for bytes32;
+    using MessageHashUtils for bytes32;
+
     IERC20 public immutable token;
-    uint256 public airdropAmount;
-    
-    // Track claims
-    mapping(address => bool) public hasClaimed;
-    
-    // Statistics
-    uint256 public totalClaimed;
-    uint256 public totalParticipants;
-    
-    // Airdrop status
-    bool public airdropActive;
-    uint256 public airdropStartTime;
-    uint256 public airdropEndTime;
-    
-    event AirdropClaimed(address indexed user, uint256 amount);
-    event AirdropAmountUpdated(uint256 newAmount);
-    event AirdropStatusUpdated(bool status);
-    event AirdropTimeUpdated(uint256 startTime, uint256 endTime);
+    address public signerAddress; // Địa chỉ ví Server (người ký lệnh rút)
+
+    // Chống lặp chi (Replay Attack): Mỗi user sẽ có số thứ tự giao dịch riêng
+    mapping(address => uint256) public nonces;
+
+    event TokensClaimed(address indexed user, uint256 amount, uint256 nonce);
+    event SignerUpdated(address newSigner);
     event EmergencyWithdraw(address indexed owner, uint256 amount);
-    
+
     constructor(
         address _token,
-        uint256 _airdropAmount,
+        address _signer,
         address initialOwner
     ) Ownable(initialOwner) {
-        require(_token != address(0), "Invalid token address");
-        require(_airdropAmount > 0, "Airdrop amount must be greater than 0");
+        require(_token != address(0), "Invalid token");
+        require(_signer != address(0), "Invalid signer");
         
         token = IERC20(_token);
-        airdropAmount = _airdropAmount;
-        airdropActive = false;
+        signerAddress = _signer;
     }
-    
+
     /**
-     * @dev Claim airdrop tokens (No Merkle Proof needed)
+     * @dev Rút token bằng chữ ký từ Server
+     * @param amount Số lượng token muốn rút
+     * @param signature Chữ ký xác thực từ Server
      */
-    function claimAirdrop() external nonReentrant {
-        require(airdropActive, "Airdrop is not active");
-        require(block.timestamp >= airdropStartTime, "Airdrop has not started yet");
-        require(block.timestamp <= airdropEndTime, "Airdrop has ended");
-        require(!hasClaimed[msg.sender], "Already claimed");
-        require(token.balanceOf(address(this)) >= airdropAmount, "Airdrop empty");
+    function claim(uint256 amount, bytes calldata signature) external nonReentrant {
+        require(amount > 0, "Amount must be > 0");
+        require(token.balanceOf(address(this)) >= amount, "Insufficient airdrop balance");
+
+        // 1. Lấy nonce hiện tại của user để đảm bảo chữ ký chỉ dùng 1 lần
+        uint256 currentNonce = nonces[msg.sender];
+
+        // 2. Tái tạo lại message đã ký: (Người Rút + Số Tiền + Số Log)
+        bytes32 messageHash = keccak256(abi.encodePacked(msg.sender, amount, currentNonce));
+        bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
+
+        // 3. Phục hồi địa chỉ người ký từ chữ ký
+        address recoveredSigner = ethSignedMessageHash.recover(signature);
         
-        // Mark as claimed
-        hasClaimed[msg.sender] = true;
-        totalClaimed += airdropAmount;
-        totalParticipants += 1;
-        
-        // Transfer tokens
-        require(token.transfer(msg.sender, airdropAmount), "Token transfer failed");
-        
-        emit AirdropClaimed(msg.sender, airdropAmount);
+        // 4. Kiểm tra xem người ký có phải là Server (Signer) của mình không
+        require(recoveredSigner == signerAddress, "Invalid signature or unauthorized claim");
+
+        // 5. Tăng nonce lên để chữ ký cũ không dùng lại được nữa
+        nonces[msg.sender]++;
+
+        // 6. Chuyển tiền
+        require(token.transfer(msg.sender, amount), "Transfer failed");
+
+        emit TokensClaimed(msg.sender, amount, currentNonce);
     }
-    
-    // Helper to check eligibility
-    function isEligible(address user) external view returns (bool) {
-        return !hasClaimed[user] && token.balanceOf(address(this)) >= airdropAmount;
-    }
-    
+
     // Admin functions
-    function setAirdropAmount(uint256 _airdropAmount) external onlyOwner {
-        require(_airdropAmount > 0, "Amount must be greater than 0");
-        airdropAmount = _airdropAmount;
-        emit AirdropAmountUpdated(_airdropAmount);
+    function setSignerAddress(address _newSigner) external onlyOwner {
+        signerAddress = _newSigner;
+        emit SignerUpdated(_newSigner);
     }
-    
-    function setAirdropStatus(bool _status) external onlyOwner {
-        airdropActive = _status;
-        emit AirdropStatusUpdated(_status);
-    }
-    
-    function setAirdropTime(uint256 _startTime, uint256 _endTime) external onlyOwner {
-        require(_endTime > _startTime, "End time must be after start time");
-        airdropStartTime = _startTime;
-        airdropEndTime = _endTime;
-        emit AirdropTimeUpdated(_startTime, _endTime);
-    }
-    
+
     function emergencyWithdraw() external onlyOwner {
         uint256 balance = token.balanceOf(address(this));
-        require(balance > 0, "No tokens to withdraw");
-        require(token.transfer(owner(), balance), "Token transfer failed");
+        require(token.transfer(owner(), balance), "Transfer failed");
         emit EmergencyWithdraw(owner(), balance);
     }
-    
-    function getRemainingTokens() external view returns (uint256) {
-        return token.balanceOf(address(this));
-    }
-    
-    function getStats() external view returns (
-        uint256 _totalClaimed,
-        uint256 _totalParticipants,
-        uint256 _remainingTokens,
-        bool _isActive
-    ) {
-        return (
-            totalClaimed,
-            totalParticipants,
-            token.balanceOf(address(this)),
-            airdropActive
-        );
+
+    // View functions
+    function getNonce(address user) external view returns (uint256) {
+        return nonces[user];
     }
 }

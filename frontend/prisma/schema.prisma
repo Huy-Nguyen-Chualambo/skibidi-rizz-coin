@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  walletAddress String    @unique
+  points        Int       @default(0) // Số dư ảo (Accumulated Points)
+  nonce         String?   // Dùng để ký verify login (random string)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  taskLogs      TaskLog[]
+  claims        ClaimLog[]
+}
+
+model Task {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  reward      Int       @default(1) // 1 Point = 1 Token
+  link        String    // Link rút gọn
+  platform    String    // 'SHORTLINK', 'TWITTER', etc.
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  
+  logs        TaskLog[]
+}
+
+model TaskLog {
+  id        String   @id @default(uuid())
+  userId    String
+  taskId    String
+  status    String   @default("COMPLETED")
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id])
+  task      Task     @relation(fields: [taskId], references: [id])
+
+  @@unique([userId, taskId]) // Mỗi task chỉ làm 1 lần (hoặc bỏ dòng này nếu cho làm nhiều lần)
+}
+
+model ClaimLog {
+  id            String   @id @default(uuid())
+  userId        String
+  amount        Int
+  txHash        String?  // Hash của giao dịch on-chain sau khi claim
+  status        String   @default("PENDING") // PENDING, SUCCESS, FAILED
+  signature     String?  // Chữ ký admin cấp cho user
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id])
+}

@@ -18,15 +18,16 @@ async function main() {
     const tokenAddress = await token.getAddress();
     console.log("✅ Token deployed to:", tokenAddress);
 
-    // 2. Deploy Airdrop (Public Mode)
-    console.log("2️⃣  Deploying SkibidiAirdrop (Public)...");
-    const airdropAmountPerUser = hre.ethers.parseEther("1000"); // 1000 SRT per user
+    // 2. Deploy Airdrop (Task-Based with Signature)
+    console.log("2️⃣  Deploying SkibidiAirdrop (Task-Based)...");
+
+    // For now, the deployer acts as the server signer
+    const signerAddress = deployer.address;
 
     const SkibidiAirdrop = await hre.ethers.getContractFactory("SkibidiAirdrop");
-    // Constructor no longer takes merkleRoot
     const airdrop = await SkibidiAirdrop.deploy(
         tokenAddress,
-        airdropAmountPerUser,
+        signerAddress, // New argument: Signer Address
         deployer.address
     );
     await airdrop.waitForDeployment();
