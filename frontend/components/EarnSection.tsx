@@ -2,13 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { useWeb3 } from "@/contexts/Web3Context";
+import { ethers, Contract } from "ethers";
+import { SKIBIDI_AIRDROP_ABI } from "@/config/abi";
 
 export default function EarnSection() {
-    const { account } = useWeb3();
+    const { account, provider } = useWeb3();
     const [tasks, setTasks] = useState<any[]>([]);
     const [userPoints, setUserPoints] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [verifying, setVerifying] = useState<string | null>(null); // taskId being verified
+    const [verifying, setVerifying] = useState<string | null>(null);
+    const [claiming, setClaiming] = useState(false);
+
 
     // Fetch User Data & Tasks
     const fetchData = async () => {
@@ -66,6 +70,42 @@ export default function EarnSection() {
         }
     };
 
+    const handleClaim = async () => {
+        if (!process.env.NEXT_PUBLIC_AIRDROP_ADDRESS) return;
+        setClaiming(true);
+        try {
+            // 1. Get Signature from Backend
+            const res = await fetch("/api/claim", { method: "POST" });
+            const data = await res.json();
+
+            if (!data.success) {
+                alert(data.error || "Claim failed");
+                setClaiming(false);
+                return;
+            }
+
+            // 2. Call Contract
+            const signer = await provider?.getSigner();
+            const contract = new Contract(
+                process.env.NEXT_PUBLIC_AIRDROP_ADDRESS,
+                SKIBIDI_AIRDROP_ABI,
+                signer
+            );
+
+            console.log("Claiming...", data.amountInWei, data.signature);
+            const tx = await contract.claim(data.amountInWei, data.signature);
+            await tx.wait();
+
+            alert(`successfully claimed ${data.amount} SRT! Check your wallet.`);
+            setUserPoints(0); // Update local state
+        } catch (error: any) {
+            console.error(error);
+            alert("Transaction Failed: " + (error.reason || error.message));
+        } finally {
+            setClaiming(false);
+        }
+    };
+
     if (!account) return null; // Hide if not connected
 
     return (
@@ -76,9 +116,24 @@ export default function EarnSection() {
                     <h2 className="text-2xl font-bold text-cyan-400 mb-2">MY BALANCE</h2>
                     <p className="text-gray-400 text-sm">Accumulated from tasks</p>
                 </div>
-                <div className="mt-4 md:mt-0">
-                    <span className="text-6xl font-black text-white drop-shadow-xl">{userPoints}</span>
-                    <span className="text-2xl font-bold text-cyan-500 ml-2">PTS</span>
+                <div className="flex items-center gap-6 mt-4 md:mt-0">
+                    <div>
+                        <span className="text-6xl font-black text-white drop-shadow-xl">{userPoints}</span>
+                        <span className="text-2xl font-bold text-cyan-500 ml-2">PTS</span>
+                    </div>
+
+                    {/* CLAIM BUTTON */}
+                    <button
+                        onClick={handleClaim}
+                        disabled={userPoints < 10 || claiming}
+                        className={`px-8 py-4 rounded-xl font-bold text-lg shadow-lg transition-all ${userPoints >= 10
+                                ? 'bg-gradient-to-r from-yellow-400 to-orange-500 hover:scale-105 text-black shadow-orange-500/50'
+                                : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                            }`}
+                    >
+                        {claiming ? "Claiming..." :
+                            userPoints < 10 ? `Min 10 to Claim` : "💰 CLAIM TOKENS"}
+                    </button>
                 </div>
             </div>
 
@@ -95,15 +150,15 @@ export default function EarnSection() {
                 ) : (
                     tasks.map((task) => (
                         <div key={task.id} className={`relative p-6 rounded-2xl border transition-all duration-300 ${task.completed
-                                ? 'bg-green-900/20 border-green-500/30 opacity-70'
-                                : 'bg-white/5 border-white/10 hover:border-cyan-500/50 hover:bg-white/10'
+                            ? 'bg-green-900/20 border-green-500/30 opacity-70'
+                            : 'bg-white/5 border-white/10 hover:border-cyan-500/50 hover:bg-white/10'
                             }`}>
                             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3 mb-2">
                                         <span className={`text-xs font-bold px-2 py-1 rounded ${task.platform === 'SHORTLINK' ? 'bg-orange-500/20 text-orange-400' :
-                                                task.platform === 'TELEGRAM' ? 'bg-blue-500/20 text-blue-400' :
-                                                    'bg-gray-500/20 text-gray-400'
+                                            task.platform === 'TELEGRAM' ? 'bg-blue-500/20 text-blue-400' :
+                                                'bg-gray-500/20 text-gray-400'
                                             }`}>
                                             {task.platform}
                                         </span>
