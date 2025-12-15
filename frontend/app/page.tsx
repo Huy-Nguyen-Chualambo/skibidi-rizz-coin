@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import ConnectButton from '@/components/ConnectButton';
 import AirdropStats from '@/components/AirdropStats';
 import ClaimAirdrop from '@/components/ClaimAirdrop';
+import EarnSection from '@/components/EarnSection';
 
 export default function Home() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -126,6 +127,7 @@ export default function Home() {
 
           <div className="lg:col-span-7 space-y-8">
             <AirdropStats />
+            <EarnSection />
 
             {/* Token Info Table */}
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-sm">
