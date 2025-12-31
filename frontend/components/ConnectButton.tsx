@@ -34,7 +34,14 @@ export default function ConnectButton() {
                 method: "POST",
                 body: JSON.stringify({ address: account }),
             });
+
+            if (!nonceRes.ok) {
+                const errData = await nonceRes.json();
+                throw new Error(errData.error || "Failed to get nonce from server");
+            }
+
             const { nonce } = await nonceRes.json();
+            if (!nonce) throw new Error("Server returned empty nonce");
 
             // 2. Sign Message
             const signer = await provider.getSigner();
