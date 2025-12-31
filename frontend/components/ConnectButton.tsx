@@ -102,7 +102,7 @@ export default function ConnectButton() {
                             disabled={isVerifying}
                             className="px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-sm rounded-full shadow-lg transition-transform hover:scale-105"
                         >
-                            {isVerifying ? "Signing..." : "🔑 Verify Account"}
+                            {isVerifying ? "Signing..." : "Verify to Claim $SRT"}
                         </button>
                     ) : (
                         <div className="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-bold rounded-lg border border-green-500/50">

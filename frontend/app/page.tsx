@@ -1,186 +1,259 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-// import Link from 'next/link';
-import ConnectButton from '@/components/ConnectButton';
-import AirdropStats from '@/components/AirdropStats';
-import ClaimAirdrop from '@/components/ClaimAirdrop';
+import HeroSection from '@/components/HeroSection';
+import HowToClaimSection from '@/components/HowToClaimSection';
+import TokenomicsChart from '@/components/TokenomicsChart';
+import RoadmapSection from '@/components/RoadmapSection';
 import EarnSection from '@/components/EarnSection';
+import AirdropStats from '@/components/AirdropStats';
 
 export default function Home() {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [scrollY, setScrollY] = useState(0);
-  const [showConfetti, setShowConfetti] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
+  const [isScrolled, setIsScrolled] = useState(false);
 
+  // Handle scroll for navbar
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
-
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      setIsScrolled(window.scrollY > 50);
+
+      // Update active section based on scroll position
+      const sections = ['home', 'airdrop', 'earn', 'tokenomics', 'roadmap', 'community'];
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          if (rect.top <= 100 && rect.bottom >= 100) {
+            setActiveSection(section);
+            break;
+          }
+        }
+      }
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('scroll', handleScroll);
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const offset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden relative selection:bg-cyan-500 selection:text-black">
-
-      {/* BACKGROUND EFFECTS */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        {/* Cyber Grid */}
-        <div className="absolute inset-0 opacity-20" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(56, 189, 248, 0.3) 1px, transparent 0)`,
-          backgroundSize: '40px 40px',
-          transform: `translateY(${scrollY * 0.2}px)`
-        }} />
-
-        {/* Glow Spheres */}
-        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-blue-600/20 rounded-full blur-[120px] mix-blend-screen animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-cyan-600/20 rounded-full blur-[120px] mix-blend-screen animate-pulse" style={{ animationDelay: '2s' }} />
-      </div>
-
-      {showConfetti && (
-        <div className="fixed inset-0 pointer-events-none z-[100]">
-          {/* Simple confetti can be kept or replaced with cleaner effect */}
-          {Array.from({ length: 30 }).map((_, i) => (
-            <div key={i} className="absolute w-2 h-2 bg-cyan-400 rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: '-10px',
-                animation: `fall ${2 + Math.random()}s linear forwards`
-              }}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/50 border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2 group cursor-pointer">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center font-bold text-black shadow-lg shadow-blue-500/50">
-              S
+    <main className="relative min-h-screen">
+      {/* Fixed Navigation */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-black/80 backdrop-blur-xl border-b border-white/10' : 'bg-transparent'
+        }`}>
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <div className="flex items-center gap-3 cursor-pointer group" onClick={() => scrollToSection('home')}>
+              <div className="w-10 h-10 bg-gradient-to-br from-lime-500 to-purple-600 rounded-xl flex items-center justify-center font-black text-xl glow-lime group-hover:scale-110 transition-transform">
+                😎
+              </div>
+              <span className="font-black text-xl">
+                <span className="text-white">Skibidi</span>
+                <span className="gradient-text">Rizz</span>
+              </span>
             </div>
-            <span className="font-bold text-xl tracking-tight text-white group-hover:text-cyan-400 transition-colors">
-              Skibidi<span className="text-gray-500">Protocol</span>
-            </span>
-          </div>
 
-          <div className="flex items-center gap-6">
-            <ConnectButton />
+            {/* Nav Links - Desktop */}
+            <div className="hidden md:flex items-center gap-1">
+              {[
+                { id: 'airdrop', label: 'Airdrop' },
+                { id: 'earn', label: 'Earn' },
+                { id: 'tokenomics', label: 'Tokenomics' },
+                { id: 'roadmap', label: 'Roadmap' },
+                { id: 'community', label: 'Community' },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => scrollToSection(item.id)}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-all ${activeSection === item.id
+                    ? 'text-white bg-white/10 glow-lime'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            {/* CTA - Mobile shows simplified version */}
+            <div className="block md:hidden">
+              <button className="px-4 py-2 bg-gradient-to-r from-lime-500 to-purple-600 rounded-full font-bold text-sm glow-lime">
+                Connect
+              </button>
+            </div>
           </div>
         </div>
       </nav>
 
-      {/* HERO SECTION */}
-      <main className="relative z-10 pt-32 pb-20 px-6 max-w-7xl mx-auto">
+      {/* Hero Section */}
+      <div id="home">
+        <HeroSection />
+      </div>
 
-        <div className="text-center max-w-4xl mx-auto mb-24">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium mb-8">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-            </span>
-            Live on Sepolia Testnet
+      {/* Airdrop Stats Section */}
+      <section id="airdrop" className="relative py-20 px-6">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-black mb-4">
+              <span className="gradient-text">Live Airdrop Stats</span>
+            </h2>
+            <p className="text-gray-400 text-lg">Track the $RIZZ distribution in real-time</p>
           </div>
 
-          <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-8 leading-tight">
-            The Future of <br />
-            <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-300 bg-clip-text text-transparent">
-              Decentralized Rizz.
-            </span>
-          </h1>
+          <AirdropStats />
 
-          <p className="text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto mb-12">
-            Experience the next generation of meme-finance infrastructure.
-            Secure, scalable, and built for the community.
-          </p>
+          <HowToClaimSection />
+        </div>
+      </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-cyan-500/50 transition-colors group">
-              <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">🛡️</div>
-              <h3 className="text-lg font-bold text-white mb-2">Audited Security</h3>
-              <p className="text-gray-400 text-sm">Smart contracts verified and tested on Sepolia network.</p>
-            </div>
-            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-cyan-500/50 transition-colors group">
-              <div className="w-12 h-12 rounded-lg bg-cyan-500/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">⚡</div>
-              <h3 className="text-lg font-bold text-white mb-2">Instant Settlement</h3>
-              <p className="text-gray-400 text-sm">Modified ERC-20 standard for lightning-fast transfers.</p>
-            </div>
-            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-cyan-500/50 transition-colors group">
-              <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">🌐</div>
-              <h3 className="text-lg font-bold text-white mb-2">Public Access</h3>
-              <p className="text-gray-400 text-sm">Open distribution model with fair-launch mechanics.</p>
+      {/* Earn Section */}
+      <section id="earn" className="relative py-20 px-6 bg-black/20">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-black mb-4">
+              <span className="gradient-text">Earn More $RIZZ</span>
+            </h2>
+            <p className="text-gray-400 text-lg">Connect wallet and complete tasks to claim your rewards</p>
+          </div>
+
+          <EarnSection />
+        </div>
+      </section>
+
+      {/* Tokenomics Section */}
+      <section id="tokenomics" className="relative py-20 px-6">
+        <div className="max-w-4xl mx-auto">
+          <TokenomicsChart />
+        </div>
+      </section>
+
+      {/* Roadmap Section */}
+      <section id="roadmap" className="relative py-20 px-6 bg-black/20">
+        <div className="max-w-5xl mx-auto">
+          <RoadmapSection />
+        </div>
+      </section>
+
+      {/* Community Section */}
+      <section id="community" className="relative py-20 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="card-dark p-12 text-center space-y-8">
+            <h2 className="text-4xl md:text-5xl font-black">
+              <span className="gradient-text">Join the Rizz Community</span>
+            </h2>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+              Connect with thousands of Sigma Rizzlers. Don't miss the latest updates, memes, and alpha.
+            </p>
+
+            {/* Social Icons */}
+            <div className="flex flex-wrap items-center justify-center gap-6 pt-6">
+              <a
+                href="https://t.me/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group"
+              >
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center text-3xl hover:scale-110 transition-transform glow-purple">
+                  <svg className="w-8 h-8 fill-white" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z" />
+                  </svg>
+                </div>
+                <div className="text-sm mt-2 text-gray-400 group-hover:text-white transition-colors">Telegram</div>
+              </a>
+
+              <a
+                href="https://twitter.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group"
+              >
+                <div className="w-16 h-16 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl flex items-center justify-center text-3xl hover:scale-110 transition-transform glow-purple">
+                  <svg className="w-7 h-7 fill-white" viewBox="0 0 24 24">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
+                </div>
+                <div className="text-sm mt-2 text-gray-400 group-hover:text-white transition-colors">X (Twitter)</div>
+              </a>
+
+              <a
+                href="https://sepolia.etherscan.io/token/0x8567c833e77565551b82c78f282d424fb8f80f66?a=0x3bdb2EC7e9E4Ea967eeEdAF0aF6D883CbCABdc02"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group"
+              >
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-700 rounded-2xl flex items-center justify-center text-2xl font-black hover:scale-110 transition-transform glow-blue">
+                  Eth
+                </div>
+                <div className="text-sm mt-2 text-gray-400 group-hover:text-white transition-colors">EtherScan</div>
+              </a>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* CLAIM INTERFACE */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+      {/* Footer */}
+      <footer className="relative py-12 px-6 border-t border-white/5">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
+            {/* Brand */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-lime-500 to-purple-600 rounded-xl flex items-center justify-center font-black text-xl">
+                  😎
+                </div>
+                <span className="font-black text-xl">
+                  <span className="text-white">Skibidi</span>
+                  <span className="gradient-text">Rizz</span>
+                </span>
+              </div>
+              <p className="text-sm text-gray-500">
+                The Ultimate Rizz in DeFi. Fair launched meme token on Sepolia testnet.
+              </p>
+            </div>
 
-          <div className="lg:col-span-7 space-y-8">
-            <AirdropStats />
-            <EarnSection />
+            {/* Quick Links */}
+            <div>
+              <h3 className="font-bold text-white mb-4">Quick Links</h3>
+              <ul className="space-y-2 text-sm text-gray-400">
+                <li><a href="#tokenomics" className="hover:text-white transition-colors">Tokenomics</a></li>
+                <li><a href="#roadmap" className="hover:text-white transition-colors">Roadmap</a></li>
+                <li><a href="https://sepolia.etherscan.io/token/0x8567c833e77565551b82c78f282d424fb8f80f66?a=0x3bdb2EC7e9E4Ea967eeEdAF0aF6D883CbCABdc02" target="_blank" className="hover:text-white transition-colors">View on Etherscan</a></li>
+              </ul>
+            </div>
 
-            {/* Token Info Table */}
-            <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-sm">
-              <table className="w-full text-left text-sm">
-                <tbody className="divide-y divide-white/5">
-                  <tr className="hover:bg-white/5 transition-colors">
-                    <td className="p-4 text-gray-400">Token Name</td>
-                    <td className="p-4 font-mono text-white text-right">Skibidi Rizz Token</td>
-                  </tr>
-                  <tr className="hover:bg-white/5 transition-colors">
-                    <td className="p-4 text-gray-400">Symbol</td>
-                    <td className="p-4 font-mono text-cyan-400 text-right">SRT</td>
-                  </tr>
-                  <tr className="hover:bg-white/5 transition-colors">
-                    <td className="p-4 text-gray-400">Network</td>
-                    <td className="p-4 font-mono text-white text-right">Sepolia</td>
-                  </tr>
-                  <tr className="hover:bg-white/5 transition-colors">
-                    <td className="p-4 text-gray-400">Contract</td>
-                    <td className="p-4 font-mono text-gray-500 text-right text-xs truncate max-w-[200px]">
-                      {process.env.NEXT_PUBLIC_TOKEN_ADDRESS}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            {/* Contract */}
+            <div>
+              <h3 className="font-bold text-white mb-4">Contract Address</h3>
+              <div className="text-xs font-mono bg-black/50 p-3 rounded-lg border border-white/5 break-all text-gray-400">
+                {process.env.NEXT_PUBLIC_AIRDROP_ADDRESS || '0x...'}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">Always verify contract before interacting</p>
             </div>
           </div>
 
-          <div className="lg:col-span-5 sticky top-24">
-            <ClaimAirdrop onSuccess={() => {
-              setShowConfetti(true);
-              setTimeout(() => setShowConfetti(false), 5000);
-            }} />
-
-            <p className="mt-6 text-center text-xs text-gray-500">
-              By connecting your wallet, you agree to our Terms of Service.
-              <br />Gas fees are required for transaction processing.
+          {/* Bottom */}
+          <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
+            <p>© 2025 SkibidiRizz Token. All rights reserved.</p>
+            <p className="text-xs">
+              <span className="text-yellow-500">⚠️</span> Disclaimer: This is a meme coin with no intrinsic value. Invest at your own risk.
             </p>
           </div>
-
         </div>
-
-        {/* FOOTER */}
-        <footer className="mt-32 border-t border-white/5 pt-12 pb-8 text-center text-gray-500 text-sm">
-          <p>© 2024 Skibidi Protocol Foundation. All rights reserved.</p>
-          <div className="flex justify-center gap-6 mt-4 opacity-50">
-            <a href="#" className="hover:text-white transition-colors">Twitter</a>
-            <a href="#" className="hover:text-white transition-colors">Discord</a>
-            <a href="#" className="hover:text-white transition-colors">GitHub</a>
-          </div>
-        </footer>
-
-      </main>
-    </div>
+      </footer>
+    </main>
   );
 }

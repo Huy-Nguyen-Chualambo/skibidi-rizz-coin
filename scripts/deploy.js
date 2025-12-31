@@ -41,20 +41,10 @@ async function main() {
     await txTransfer.wait(); // Wait for confirmation
     console.log("✅ Transferred 400,000 SRT to Airdrop");
 
-    // 4. Activate Airdrop
-    console.log("4️⃣  Activating Airdrop...");
-    const startTime = Math.floor(Date.now() / 1000);
-    const endTime = startTime + (30 * 24 * 60 * 60); // 30 days
+    // Note: New contract doesn't require manual activation
+    // It's ready to accept claims with backend signatures immediately
 
-    const txTime = await airdrop.setAirdropTime(startTime, endTime);
-    await txTime.wait();
-
-    const txStatus = await airdrop.setAirdropStatus(true);
-    await txStatus.wait();
-
-    console.log("✅ Airdrop Activated!");
-
-    // 5. UPDATE FRONTEND AUTOMATICALLY
+    // 4. UPDATE FRONTEND AUTOMATICALLY
     console.log("\n🔄 Updating Frontend Config & ABIs...");
 
     // Update .env.local
