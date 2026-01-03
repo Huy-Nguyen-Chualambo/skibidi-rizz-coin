@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import HeroSection from '@/components/HeroSection';
+import ProjectOverview from '@/components/ProjectOverview';
 import HowToClaimSection from '@/components/HowToClaimSection';
 import TokenomicsChart from '@/components/TokenomicsChart';
 import RoadmapSection from '@/components/RoadmapSection';
@@ -18,7 +19,7 @@ export default function Home() {
       setIsScrolled(window.scrollY > 50);
 
       // Update active section based on scroll position
-      const sections = ['home', 'airdrop', 'earn', 'tokenomics', 'roadmap', 'community'];
+      const sections = ['home', 'overview', 'earn', 'tokenomics', 'roadmap', 'community'];
       for (const section of sections) {
         const element = document.getElementById(section);
         if (element) {
@@ -70,7 +71,7 @@ export default function Home() {
             {/* Nav Links - Desktop */}
             <div className="hidden md:flex items-center gap-1">
               {[
-                { id: 'airdrop', label: 'Airdrop' },
+                { id: 'overview', label: 'Overview' },
                 { id: 'earn', label: 'Earn' },
                 { id: 'tokenomics', label: 'Tokenomics' },
                 { id: 'roadmap', label: 'Roadmap' },
@@ -104,17 +105,17 @@ export default function Home() {
         <HeroSection />
       </div>
 
-      {/* Airdrop Stats Section */}
-      <section id="airdrop" className="relative py-20 px-6">
+      {/* Project Overview Section */}
+      <section id="overview" className="relative py-20 px-6">
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-black mb-4">
-              <span className="gradient-text">Live Airdrop Stats</span>
+              <span className="gradient-text">Project Overview</span>
             </h2>
-            <p className="text-gray-400 text-lg">Track the $RIZZ distribution in real-time</p>
+            <p className="text-gray-400 text-lg">Unconventional appeal meets decentralized technology</p>
           </div>
 
-          <AirdropStats />
+          <ProjectOverview />
 
           <HowToClaimSection />
         </div>

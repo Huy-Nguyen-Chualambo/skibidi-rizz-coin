@@ -16,9 +16,14 @@ export default function RoadmapSection() {
         },
         {
             phase: "Phase 3",
-            title: "Future Steps",
+            title: "DeFi ecosystem & Utility",
             status: "upcoming",
-            items: ["Listening to Community Feedback", "Expanding Task Rewards", "Exploring New Use Cases"]
+            items: [
+                "The Sigma Vault (Staking Protocol v1)",
+                "Liquidity Pool Optimization (DEX)",
+                "Governance (DAO) Framework Initiation",
+                "Expansion of Task-to-Earn use cases"
+            ]
         },
     ];
 
