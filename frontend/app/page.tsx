@@ -7,7 +7,7 @@ import HowToClaimSection from '@/components/HowToClaimSection';
 import TokenomicsChart from '@/components/TokenomicsChart';
 import RoadmapSection from '@/components/RoadmapSection';
 import EarnSection from '@/components/EarnSection';
-import AirdropStats from '@/components/AirdropStats';
+import ConnectButton from '@/components/ConnectButton';
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState('home');
@@ -88,13 +88,14 @@ export default function Home() {
                   {item.label}
                 </button>
               ))}
+              <div className="ml-4">
+                <ConnectButton compact={true} />
+              </div>
             </div>
 
-            {/* CTA - Mobile shows simplified version */}
-            <div className="block md:hidden">
-              <button className="px-4 py-2 bg-gradient-to-r from-lime-500 to-purple-600 rounded-full font-bold text-sm glow-lime">
-                Connect
-              </button>
+            {/* CTA - Mobile */}
+            <div className="md:hidden">
+              <ConnectButton compact={true} />
             </div>
           </div>
         </div>
