@@ -102,15 +102,17 @@ export default function TokenomicsChart() {
 
             {/* Contract Info */}
             <div className="mt-8 p-4 bg-black/30 rounded-xl border border-white/5">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div className="text-xs text-gray-500">Contract:</div>
-                    <code className="text-xs font-mono text-gray-300 bg-black/50 px-3 py-1 rounded">
+                <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                        <div className="text-xs text-gray-500 font-bold uppercase tracking-wider">Token Contract:</div>
+                        <div className="flex items-center gap-2 text-xs bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">
+                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                            <span className="text-green-400 font-medium">Verified</span>
+                        </div>
+                    </div>
+                    <code className="text-[10px] md:text-xs font-mono text-gray-300 bg-black/50 px-4 py-2 rounded-lg border border-white/5 break-all leading-relaxed">
                         {process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0x..."}
                     </code>
-                    <div className="flex items-center gap-2 text-xs">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <span className="text-green-400">Verified</span>
-                    </div>
                 </div>
             </div>
         </div>
