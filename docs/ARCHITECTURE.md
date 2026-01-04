@@ -1,391 +1,71 @@
-# SkibidiRizz Token - Architecture Diagrams
+# 🏗 Project Architecture - SkibidiRizz Ecosystem
 
-## System Architecture Overview
+> **Note:** This is a simplified architecture designed for an academic project demonstrating Web3 and Fintech concepts.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    USER INTERFACE LAYER                      │
-│  ┌───────────┐  ┌──────────┐  ┌────────────┐  ┌──────────┐ │
-│  │  Landing  │  │  Claim   │  │   Stats    │  │  Wallet  │ │
-│  │   Page    │  │   Form   │  │ Dashboard  │  │ Connect  │ │
-│  └─────┬─────┘  └────┬─────┘  └─────┬──────┘  └────┬─────┘ │
-│        │             │               │              │       │
-│        └─────────────┴───────────────┼──────────────┘       │
-│                                      │                       │
-└──────────────────────────────────────┼───────────────────────┘
-                                       │
-                    ┌──────────────────▼──────────────────┐
-                    │      WEB3 INTEGRATION LAYER         │
-                    │  ┌────────────┐  ┌──────────────┐  │
-                    │  │  Ethers.js │  │   MetaMask   │  │
-                    │  │  Provider  │  │    Signer    │  │
-                    │  └──────┬─────┘  └──────┬───────┘  │
-                    │         │                │          │
-                    └─────────┼────────────────┼──────────┘
-                              │                │
-        ┌─────────────────────┴────────────────┴──────────────────┐
-        │              BLOCKCHAIN LAYER (Ethereum)                 │
-        │                                                           │
-        │  ┌───────────────────────────────────────────────────┐  │
-        │  │         SkibidiAirdrop Contract                   │  │
-        │  │  ┌──────────────┐  ┌────────────┐  ┌───────────┐ │  │
-        │  │  │ Merkle Tree  │  │   Claim    │  │   Admin   │ │  │
-        │  │  │ Verification │  │   Logic    │  │  Controls │ │  │
-        │  │  └──────┬───────┘  └─────┬──────┘  └─────┬─────┘ │  │
-        │  │         │                 │               │       │  │
-        │  └─────────┼─────────────────┼───────────────┼───────┘  │
-        │            │                 │               │          │
-        │  ┌─────────▼─────────────────▼───────────────▼───────┐  │
-        │  │         SkibidiRizzToken (ERC-20)                 │  │
-        │  │  ┌──────────┐  ┌──────────┐  ┌─────────────────┐ │  │
-        │  │  │ Transfer │  │   Burn   │  │ balanceOf/etc.  │ │  │
-        │  │  └──────────┘  └──────────┘  └─────────────────┘ │  │
-        │  └───────────────────────────────────────────────────┘  │
-        │                                                           │
-        └───────────────────────────────────────────────────────────┘
+## 1. System Overview
+The SkibidiRizz ecosystem is a **Hybrid Web3 Application** (dApp) that combines traditional web technologies (PostgreSQL, Next.js) with decentralized blockchain technology (Ethereum Sepolia, Smart Contracts).
+
+```mermaid
+graph TD
+    User((User)) -->|Connect Wallet| Frontend[Next.js Frontend]
+    User -->|Perform Tasks| Frontend
+    Frontend -->|Verify JWT| API[Next.js API Routes]
+    API -->|Read/Write| DB[(Supabase/PostgreSQL)]
+    API -->|Sign Claim| Signer[Backend Signer Provider]
+    Frontend -->|Submit Signature| Contract[SkibidiAirdrop Contract]
+    Contract -->|Verify Signature| Contract
+    Contract -->|Transfer Tokens| Token[SkibidiRizz Token ERC-20]
+    Token -->|Send SRT| User
 ```
 
 ---
 
-## Smart Contract Interaction Flow
+## 2. Core Components
 
-```
-┌─────────┐
-│  USER   │
-└────┬────┘
-     │ 1. Connect Wallet
-     ▼
-┌─────────────┐
-│  MetaMask   │ ◄──── Authenticates user
-└─────┬───────┘
-      │ 2. Request accounts
-      ▼
-┌──────────────┐
-│  Frontend    │ ◄──── Stores address & signer
-└──────┬───────┘
-       │ 3. Check eligibility
-       │    (view call - no gas)
-       ▼
-┌─────────────────┐
-│ Airdrop Contract │
-│  isEligible()    │ ◄──── Returns true/false
-└──────┬──────────┘
-       │ 4. If eligible: claimAirdrop()
-       │    (transaction - requires gas)
-       ▼
-┌─────────────────┐
-│ Merkle Verify   │ ◄──── On-chain verification
-└──────┬──────────┘
-       │ 5. If valid: mark as claimed
-       ▼
-┌─────────────────┐
-│ hasClaimed[user]│ ◄──── Permanently stored
-│     = true      │
-└──────┬──────────┘
-       │ 6. Transfer tokens
-       ▼
-┌─────────────────┐
-│  Token Contract │
-│   transfer()    │ ◄──── Sends SRT to user
-└──────┬──────────┘
-       │ 7. Emit event
-       ▼
-┌─────────────────┐
-│ AirdropClaimed  │ ◄──── Logged on blockchain
-│     Event       │
-└──────┬──────────┘
-       │ 8. Frontend updates
-       ▼
-┌─────────────────┐
-│  Success UI     │ ◄──── Shows confirmation
-└─────────────────┘
-```
+### A. Blockchain Layer (Ethereum Sepolia)
+*   **SkibidiRizzToken (SRT)**: A standard ERC-20 token with a fixed supply of 1,000,000.
+*   **SkibidiAirdrop**: A distribution contract that uses **ECDSA Cryptographic Signatures** for authorization. It ensures each user can only claim once and only with a valid server-side signature.
+
+### B. Backend Layer (Next.js & Prisma)
+*   **Authentication (SIWE)**: Uses *Sign-In with Ethereum* to authenticate users via their wallets. No passwords are stored; security relies on cryptographic message signing.
+*   **Task Engine**: Manages user points and task status. Tasks are stored in a database to avoid excessive blockchain gas fees for simple actions.
+*   **Signature Provider**: A secure backend service that holds the `ADMIN_PRIVATE_KEY` to authorize legitimate claims.
+
+### C. Database Layer (Supabase)
+*   **User Table**: Stores wallet addresses and total accumulated points.
+*   **Task Log**: Tracks which users have completed which tasks.
+*   **Claim Log**: Audits all signature requests to prevent double-spending attempts at the API level.
 
 ---
 
-## Merkle Tree Structure
+## 3. Data Flow: The "Task-to-Earn" Loop
 
-```
-                    ROOT (stored on-chain)
-                    ┌─────┴─────┐
-                    │ Hash12,34 │
-                    └─────┬─────┘
-          ┌───────────────┴───────────────┐
-          │                               │
-    ┌─────▼─────┐                   ┌─────▼─────┐
-    │ Hash1,2   │                   │ Hash3,4   │
-    └─────┬─────┘                   └─────┬─────┘
-      ┌───┴───┐                       ┌───┴───┐
-      │       │                       │       │
-  ┌───▼──┐ ┌──▼───┐             ┌───▼──┐ ┌──▼───┐
-  │Hash1 │ │Hash2 │             │Hash3 │ │Hash4 │
-  └──┬───┘ └───┬──┘             └──┬───┘ └───┬──┘
-     │         │                   │         │
-┌────▼───┐ ┌───▼────┐       ┌─────▼────┐ ┌──▼─────┐
-│User1   │ │User2   │       │User3     │ │User4   │
-│0x123...│ │0x456...│       │0x789...  │ │0xabc...│
-└────────┘ └────────┘       └──────────┘ └────────┘
+### Step 1: Authentication
+1. User connects wallet.
+2. Server provides a unique **Nonce**.
+3. User signs the nonce with their private key (MetaMask).
+4. Server verifies signature and issues a **JWT** (JSON Web Token) stored in a secure cookie.
 
-To prove User1 is whitelisted, provide:
-- Hash2 (sibling)
-- Hash3,4 (uncle)
-- Combine with Hash1 to recreate ROOT
-```
+### Step 2: Earning Points
+1. User clicks "Visit Link" or "Follow Socials".
+2. Frontend notifies API.
+3. API verifies task completion and updates the user's points in the **PostgreSQL** database.
 
-**Verification Process**:
-1. Hash user address → Hash1
-2. Combine Hash1 + Hash2 → Hash1,2
-3. Combine Hash1,2 + Hash3,4 → ROOT
-4. Compare ROOT with stored merkleRoot
-5. If match → User is whitelisted ✅
-
-**Proof Size**: Only log₂(n) hashes needed!
-- 1,000 users = 10 proof elements
-- 1,000,000 users = 20 proof elements
+### Step 3: Claiming Tokens (Web3 Bridge)
+1. User clicks "Claim".
+2. API checks if user has enough points and hasn't claimed before.
+3. API uses the `ADMIN_PRIVATE_KEY` to sign a message containing `{userAddress, amount}`.
+4. Signature is returned to the Frontend.
+5. User sends a transaction to the `claimTokens` function on the Smart Contract, passing the signature.
+6. **Smart Contract** verifies the signature using `ecrecover`. If valid, it sends tokens directly to the user's wallet.
 
 ---
 
-## Token Flow Diagram
-
-```
-┌────────────────┐
-│  Deploy Token  │  ←  1,000,000 SRT created
-└───────┬────────┘
-        │
-        ▼
-┌────────────────┐
-│  Owner Wallet  │  ←  All tokens initially
-└───┬──────┬─────┘
-    │      │
-    │ 40%  │ 20%         20%           15%          5%
-    │      │
-    ▼      ▼
-┌───────┐ ┌─────────┐  ┌──────────┐  ┌─────────┐  ┌──────────┐
-│Airdrop│ │Liquidity│  │   Team   │  │ Rewards │  │Marketing │
-│400k   │ │  200k   │  │   200k   │  │  150k   │  │   50k    │
-└───┬───┘ └────┬────┘  └─────┬────┘  └────┬────┘  └────┬─────┘
-    │          │             │             │            │
-    │          │             │             │            │
-    ▼          ▼             ▼             ▼            ▼
-┌───────┐  ┌──────┐    ┌──────────┐  ┌─────────┐  ┌─────────┐
-│Users  │  │Uniswap    │24-month  │  │Quarterly│  │As needed│
-│Claim  │  │Pool   │   │Vesting   │  │Release  │  │Spend    │
-└───────┘  └───────┘   └──────────┘  └─────────┘  └─────────┘
-```
-
-**Flow Control**:
-- Airdrop: Immediate unlock on claim
-- Liquidity: 12-month lock (cannot withdraw)
-- Team: 6-month cliff + 24-month linear vesting
-- Rewards: Released based on governance vote
-- Marketing: Controlled spending by multisig
+## 4. Security Philosophy
+For this academic project, we prioritized **Hybrid Security**:
+1.  **Sybil Resistance**: Wallet connection and task-based earning make it expensive for bots to farm tokens.
+2.  **Gas Efficiency**: By keeping task logic off-chain and only using the blockchain for the final claim, we reduce costs by over 90% compared to fully on-chain systems.
+3.  **Cryptographic Integrity**: The use of ECDSA ensures that even if the Frontend is compromised, the Smart Contract will only release tokens for signatures authorized by our backend.
 
 ---
-
-## Frontend Component Hierarchy
-
-```
-App
-├── Layout
-│   ├── Navigation
-│   │   ├── Logo
-│   │   └── ConnectButton ◄─── Web3Context
-│   └── Footer
-└── Page (Landing)
-    ├── Hero Section
-    │   ├── Title/Description
-    │   └── Background Effects
-    ├── AirdropStats ◄─── Fetches on-chain data
-    │   ├── TotalClaimed
-    │   ├── TotalParticipants
-    │   ├── RemainingTokens
-    │   └── AmountPerUser
-    ├── ClaimAirdrop ◄─── Web3Context + Contract
-    │   ├── EligibilityCheck
-    │   ├── ClaimButton
-    │   ├── TransactionStatus
-    │   └── ErrorDisplay
-    └── InfoSection
-        ├── Tokenomics
-        └── Features
-
-Context Providers:
-├── Web3Provider ◄─── Manages wallet state
-    ├── account
-    ├── provider
-    ├── signer
-    └── connectWallet()
-```
-
----
-
-## Deployment Pipeline
-
-```
-┌─────────────┐
-│  Development│
-│   (Local)   │
-└──────┬──────┘
-       │ 1. Write code
-       │ 2. Test locally
-       ▼
-┌─────────────┐
-│  Hardhat    │
-│  Local Node │ ◄─── npx hardhat node
-└──────┬──────┘
-       │ 3. Deploy to local
-       │ 4. Test with frontend
-       ▼
-┌─────────────┐
-│  Testnet    │
-│  (Sepolia)  │ ◄─── npx hardhat run --network sepolia
-└──────┬──────┘
-       │ 5. Community testing
-       │ 6. Bug fixes
-       ▼
-┌─────────────┐
-│   Audit     │
-│ (CertiK/OZ) │ ◄─── Professional review
-└──────┬──────┘
-       │ 7. Fix vulnerabilities
-       │ 8. Re-audit if needed
-       ▼
-┌─────────────┐
-│  Mainnet    │
-│  Deployment │ ◄─── Production launch
-└──────┬──────┘
-       │ 9. Monitor 24/7
-       │ 10. Respond to issues
-       ▼
-┌─────────────┐
-│  Ongoing    │
-│ Maintenance │ ◄─── Updates, governance
-└─────────────┘
-```
-
----
-
-## Security Layers
-
-```
-┌─────────────────────────────────────────┐
-│         APPLICATION SECURITY             │
-│  • Input validation                      │
-│  • XSS protection                        │
-│  • CSRF tokens                           │
-└───────────────┬─────────────────────────┘
-                │
-┌───────────────▼─────────────────────────┐
-│        WEB3 SECURITY                     │
-│  • Verify contract addresses             │
-│  • Check network ID                      │
-│  • Validate signatures                   │
-└───────────────┬─────────────────────────┘
-                │
-┌───────────────▼─────────────────────────┐
-│     SMART CONTRACT SECURITY              │
-│  • Reentrancy guards                     │
-│  • Access control (Ownable)              │
-│  • Integer overflow protection           │
-│  • Event logging                         │
-└───────────────┬─────────────────────────┘
-                │
-┌───────────────▼─────────────────────────┐
-│       OPERATIONAL SECURITY               │
-│  • Multi-sig wallet                      │
-│  • Monitoring/alerting                   │
-│  • Incident response plan                │
-│  • Regular audits                        │
-└───────────────┬─────────────────────────┘
-                │
-┌───────────────▼─────────────────────────┐
-│      BLOCKCHAIN SECURITY                 │
-│  • Proof of Work/Stake consensus         │
-│  • Immutability                          │
-│  • Decentralization                      │
-└──────────────────────────────────────────┘
-```
-
----
-
-## Data Flow: Claim Transaction
-
-```
-Frontend                Smart Contract              Blockchain
-   │                         │                          │
-   │  1. claimAirdrop()      │                          │
-   ├─────────────────────────▶                          │
-   │                         │                          │
-   │                    2. Check active                │
-   │                    3. Check time                  │
-   │                    4. Check hasClaimed            │
-   │                    5. Verify merkle proof         │
-   │                         │                          │
-   │                    6. Update state                │
-   │                       hasClaimed = true           │
-   │                       totalClaimed += amount      │
-   │                       totalParticipants++         │
-   │                         │                          │
-   │                    7. Transfer tokens             │
-   │                         │                          │
-   │                    8. Emit event                  │
-   │                         ├──────────────────────────▶
-   │                         │              9. Mine block
-   │  10. Transaction hash   │                          │
-   ◀─────────────────────────┤                          │
-   │                         │              10. Confirm │
-   │  11. Receipt            │                          │
-   ◀─────────────────────────┤◀─────────────────────────┤
-   │                         │                          │
-   │  12. Update UI          │                          │
-   │     - Show success      │                          │
-   │     - Refresh balance   │                          │
-   │                         │                          │
-```
-
----
-
-## Cost Analysis
-
-```
-┌────────────────────────────────────────────────────┐
-│                GAS COST COMPARISON                  │
-├────────────────┬──────────┬──────────┬─────────────┤
-│   Operation    │ Our Cost │ Typical  │   Savings   │
-├────────────────┼──────────┼──────────┼─────────────┤
-│ Deploy Token   │ 1.2M gas │ 1.5M gas │     20%     │
-│ Deploy Airdrop │ 800k gas │ 2.5M gas │     68%     │
-│ Add Whitelist  │  45k gas │ 200M gas │   99.97%    │
-│ Claim Airdrop  │  50k gas │ 150k gas │     66%     │
-├────────────────┼──────────┼──────────┼─────────────┤
-│ TOTAL (10k)    │  545k    │  3.65M   │     85%     │
-└────────────────┴──────────┴──────────┴─────────────┘
-
-At 50 Gwei gas price & $2000 ETH:
-- Our total cost: $54.50
-- Typical cost: $365
-- You save: $310.50
-```
-
----
-
-## Timeline Visualization
-
-```
-Month 1-2        Month 3-4       Month 5-6       Month 7-12
-───────────────────────────────────────────────────────────▶
-    MVP              Launch        Growth         Scale
-────────────────────────────────────────────────────────────
-│                │              │              │
-│ • Contracts    │ • Audit      │ • Staking    │ • Bridge
-│ • Frontend     │ • Mainnet    │ • NFTs       │ • DAO
-│ • Testing      │ • Airdrop    │ • Quests     │ • Mobile
-│ • Docs         │ • Marketing  │ • Referrals  │ • CEX
-│                │              │              │
-▼                ▼              ▼              ▼
-Testnet      Production     Features      Ecosystem
-```
-
----
-
-*Diagrams Version 1.0 | December 2024*
+*Version 2.0 | Academic Final Project Revision*
