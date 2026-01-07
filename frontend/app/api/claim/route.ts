@@ -65,11 +65,11 @@ export async function POST(req: Request) {
         // Connect to simple provider (backend doesn't need to connect to chain to sign, just wallet)
         const wallet = new ethers.Wallet(ADMIN_PRIVATE_KEY);
 
-        // Fallback for missing env vars
+        // Fallback for missing env vars (Matching your latest deploy)
         const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com";
-        const airdropAddress = process.env.NEXT_PUBLIC_AIRDROP_ADDRESS || "0x15f7B03AFBA398553d93F3FF273fb8841B55B4F7";
+        const airdropAddress = process.env.NEXT_PUBLIC_AIRDROP_ADDRESS || "0xA408351f26edf62024222A6c140e62Cd66e35cc7";
 
-        console.log("Vercel - Using Airdrop Address:", airdropAddress);
+        console.log("Using Airdrop Address:", airdropAddress);
 
         const provider = new ethers.JsonRpcProvider(rpcUrl);
         const claimContract = new ethers.Contract(
