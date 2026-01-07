@@ -74,7 +74,7 @@ export async function POST(req: Request) {
         const provider = new ethers.JsonRpcProvider(rpcUrl);
         const claimContract = new ethers.Contract(
             airdropAddress,
-            ["function nonces(address) view returns (uint256)"],
+            ["function getNonce(address) view returns (uint256)"],
             provider
         );
 
@@ -96,7 +96,7 @@ export async function POST(req: Request) {
             const network = await provider.getNetwork();
             console.log("Connected to Network:", network.name, network.chainId.toString());
 
-            contractNonce = await claimContract.nonces(user.walletAddress);
+            contractNonce = await claimContract.getNonce(user.walletAddress);
             console.log("Contract Nonce fetched:", contractNonce.toString());
         } catch (contractError: any) {
             console.error("Contract Call Error (nonces):", contractError);
