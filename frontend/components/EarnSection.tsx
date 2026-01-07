@@ -52,6 +52,7 @@ export default function EarnSection() {
         try {
             const res = await fetch("/api/tasks/verify", {
                 method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ taskId: task.id })
             });
             const data = await res.json();
@@ -127,8 +128,8 @@ export default function EarnSection() {
                         onClick={handleClaim}
                         disabled={userPoints < 10 || claiming}
                         className={`px-8 py-4 rounded-xl font-bold text-lg shadow-lg transition-all ${userPoints >= 10
-                                ? 'bg-gradient-to-r from-yellow-400 to-orange-500 hover:scale-105 text-black shadow-orange-500/50'
-                                : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                            ? 'bg-gradient-to-r from-yellow-400 to-orange-500 hover:scale-105 text-black shadow-orange-500/50'
+                            : 'bg-gray-700 text-gray-500 cursor-not-allowed'
                             }`}
                     >
                         {claiming ? "Claiming..." :

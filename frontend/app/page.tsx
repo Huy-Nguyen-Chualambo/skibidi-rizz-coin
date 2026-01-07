@@ -192,7 +192,7 @@ export default function Home() {
               </a>
 
               <a
-                href="https://sepolia.etherscan.io/token/0x8567c833e77565551b82c78f282d424fb8f80f66?a=0x3bdb2EC7e9E4Ea967eeEdAF0aF6D883CbCABdc02"
+                href={`${process.env.NEXT_PUBLIC_BLOCK_EXPLORER}/token/${process.env.NEXT_PUBLIC_TOKEN_ADDRESS}?a=${process.env.NEXT_PUBLIC_AIRDROP_ADDRESS}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group"
@@ -233,7 +233,7 @@ export default function Home() {
               <ul className="space-y-2 text-sm text-gray-400">
                 <li><a href="#tokenomics" className="hover:text-white transition-colors">Tokenomics</a></li>
                 <li><a href="#roadmap" className="hover:text-white transition-colors">Roadmap</a></li>
-                <li><a href="https://sepolia.etherscan.io/token/0x8567c833e77565551b82c78f282d424fb8f80f66?a=0x3bdb2EC7e9E4Ea967eeEdAF0aF6D883CbCABdc02" target="_blank" className="hover:text-white transition-colors">View on Etherscan</a></li>
+                <li><a href={`${process.env.NEXT_PUBLIC_BLOCK_EXPLORER}/token/${process.env.NEXT_PUBLIC_TOKEN_ADDRESS}`} target="_blank" className="hover:text-white transition-colors">View on Etherscan</a></li>
               </ul>
             </div>
 

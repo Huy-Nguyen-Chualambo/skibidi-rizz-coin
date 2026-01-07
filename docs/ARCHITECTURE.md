@@ -56,7 +56,7 @@ graph TD
 2. API checks if user has enough points and hasn't claimed before.
 3. API uses the `ADMIN_PRIVATE_KEY` to sign a message containing `{userAddress, amount}`.
 4. Signature is returned to the Frontend.
-5. User sends a transaction to the `claimTokens` function on the Smart Contract, passing the signature.
+5. User sends a transaction to the `claim` function on the Smart Contract, passing the signature.
 6. **Smart Contract** verifies the signature using `ecrecover`. If valid, it sends tokens directly to the user's wallet.
 
 ---

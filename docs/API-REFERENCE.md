@@ -7,7 +7,7 @@ The central distribution point for SRT tokens.
 
 | Function | Type | Description |
 | :--- | :--- | :--- |
-| `claimTokens(uint256 amount, bytes sig)` | Write | Claims SRT by providing a backend signature. |
+| `claim(uint256 amount, bytes sig)` | Write | Claims SRT by providing a backend signature. |
 | `hasClaimed(address)` | Read | Returns `true` if the address has already claimed. |
 | `totalClaimed()` | Read | Total tokens distributed so far. |
 | `token()` | Read | Address of the SRT ERC-20 contract. |

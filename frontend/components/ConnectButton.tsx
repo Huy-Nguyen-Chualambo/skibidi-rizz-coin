@@ -5,13 +5,17 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 
 export default function ConnectButton({ compact = false }: { compact?: boolean }) {
-    const { account, provider, connectWallet, disconnectWallet, isConnecting, error } = useWeb3();
+    const { account, provider, connectWallet, disconnectWallet, isConnecting } = useWeb3();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isVerifying, setIsVerifying] = useState(false);
 
     // Check login status on mount
     useEffect(() => {
         const checkLogin = async () => {
+            if (!account) {
+                setIsLoggedIn(false);
+                return;
+            }
             try {
                 const res = await fetch("/api/auth/user");
                 const data = await res.json();
@@ -20,9 +24,11 @@ export default function ConnectButton({ compact = false }: { compact?: boolean }
                 } else {
                     setIsLoggedIn(false);
                 }
-            } catch (e) { setIsLoggedIn(false); }
+            } catch (e) {
+                setIsLoggedIn(false);
+            }
         };
-        if (account) checkLogin();
+        checkLogin();
     }, [account]);
 
     const handleLogin = async () => {
@@ -33,6 +39,7 @@ export default function ConnectButton({ compact = false }: { compact?: boolean }
             const nonceRes = await fetch("/api/auth/nonce", {
                 method: "POST",
                 body: JSON.stringify({ address: account }),
+                headers: { "Content-Type": "application/json" }
             });
 
             if (!nonceRes.ok) {
@@ -51,26 +58,33 @@ export default function ConnectButton({ compact = false }: { compact?: boolean }
             const loginRes = await fetch("/api/auth/login", {
                 method: "POST",
                 body: JSON.stringify({ address: account, signature }),
+                headers: { "Content-Type": "application/json" }
             });
 
             if (loginRes.ok) {
                 setIsLoggedIn(true);
             } else {
-                alert("Login Failed!");
+                const err = await loginRes.json();
+                alert("Login Failed: " + (err.error || "Unknown error"));
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            alert("User Rejected Signature");
+            alert("Verification Failed: " + (error.message || "User Rejected Signature"));
         } finally {
             setIsVerifying(false);
         }
     };
 
     const handleDisconnect = async () => {
-        // Logout backend
-        await fetch("/api/auth/user", { method: "DELETE" });
-        setIsLoggedIn(false);
-        disconnectWallet();
+        try {
+            // Logout backend
+            await fetch("/api/auth/user", { method: "DELETE" });
+            setIsLoggedIn(false);
+            disconnectWallet();
+        } catch (e) {
+            console.error("Disconnect error:", e);
+            disconnectWallet();
+        }
     };
 
     const formatAddress = (address: string) => {
@@ -83,7 +97,7 @@ export default function ConnectButton({ compact = false }: { compact?: boolean }
                 <button
                     onClick={connectWallet}
                     disabled={isConnecting}
-                    className={`${compact ? 'px-3 py-1.5 text-xs' : 'px-8 py-3'} bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-full shadow-lg transition-all duration-200 whitespace-nowrap`}
+                    className={`${compact ? 'px-3 py-1.5 text-xs' : 'px-8 py-3'} bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-full shadow-lg transition-all duration-200 whitespace-nowrap glow-lime`}
                 >
                     {isConnecting ? "..." : (compact ? "🦊 Connect" : "🦊 Connect Wallet")}
                 </button>
@@ -100,9 +114,9 @@ export default function ConnectButton({ compact = false }: { compact?: boolean }
                         <button
                             onClick={handleLogin}
                             disabled={isVerifying}
-                            className={`${compact ? 'px-2 py-1 text-[10px]' : 'px-4 py-2 text-sm'} bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-full shadow-lg transition-transform hover:scale-105`}
+                            className={`${compact ? 'px-2 py-1 text-[10px]' : 'px-4 py-2 text-sm'} bg-yellow-400 hover:bg-yellow-300 text-black font-bold rounded-full shadow-lg transition-transform hover:scale-105`}
                         >
-                            {isVerifying ? "..." : (compact ? "🔑 Verify" : "Verify to Claim $SRT")}
+                            {isVerifying ? "..." : (compact ? "🔑 Verify" : "Verify to Claim")}
                         </button>
                     ) : (
                         !compact && (

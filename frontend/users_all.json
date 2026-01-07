@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1c58890c-4694-411c-9a35-94ef71e7db9d",
+    "walletAddress": "0xd999312e3b6df24927e9ff72f380773f0fcf0e48",
+    "points": 0,
+    "nonce": null,
+    "createdAt": "2026-01-07T12:37:08.633Z",
+    "updatedAt": "2026-01-07T12:37:14.080Z"
+  },
+  {
+    "id": "c35dc78f-6fe1-4300-ad67-baaea8b4c560",
+    "walletAddress": "0x791b90ae817e012f289c7b163e0f971f529f0c69",
+    "points": 0,
+    "nonce": null,
+    "createdAt": "2026-01-07T13:17:39.415Z",
+    "updatedAt": "2026-01-07T13:17:42.897Z"
+  },
+  {
+    "id": "8e7b5af6-cde1-46e6-9935-91b4f2df3595",
+    "walletAddress": "0x5aed945c69e8a648f3ef8b6fcc22a92ef9d505e0",
+    "points": 15,
+    "nonce": null,
+    "createdAt": "2026-01-03T15:31:52.013Z",
+    "updatedAt": "2026-01-07T13:21:11.221Z"
+  }
+]
