@@ -65,9 +65,9 @@ export async function POST(req: Request) {
         // Connect to simple provider (backend doesn't need to connect to chain to sign, just wallet)
         const wallet = new ethers.Wallet(ADMIN_PRIVATE_KEY);
 
-        // Fallback for missing env vars (Matching deployment-info.json)
+        // Fallback for missing env vars (VERIFIED on Sepolia Etherscan)
         const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com";
-        const airdropAddress = process.env.NEXT_PUBLIC_AIRDROP_ADDRESS || "0xf373f4b5e079cCF28cD87D4B80FC3b9877d5e716";
+        const airdropAddress = process.env.NEXT_PUBLIC_AIRDROP_ADDRESS || "0x75985F98C9619c1Cd85d225ec21631dA647382de";
 
         console.log("Using Airdrop Address:", airdropAddress);
 
