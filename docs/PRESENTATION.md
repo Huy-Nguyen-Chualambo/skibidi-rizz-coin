@@ -141,7 +141,7 @@ bytes32 public merkleRoot;
 
 ### How to Claim Your Airdrop
 
-1. **Visit** https://skibidirizz.io
+1. **Visit** https://skibidirizz.vercel.app
 2. **Connect** MetaMask wallet
 3. **Verify** eligibility (automatic)
 4. **Click** "Claim Airdrop" button
